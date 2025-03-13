@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: KidCollection
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/kidscollection?useSSL=false&serverTimezone=UTC
+    username: root
+    password: Sahed@prova123
+#    hikari:
+#      pool-name: WritePool
+#      connection-timeout: 30000
+#      idle-timeout: 30000
+#      max-lifetime: 1800000
+#      maximum-pool-size: 5
+#      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect  # ? Added this
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+server:
+  servlet:
+    context-path: /api/v1
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+        jdbc: DEBUG
+    com:
+      zaxxer:
+        hikari: DEBUG
