@@ -5,10 +5,11 @@ import com.kids.collection.exception.CategoryNotFoundException;
 import com.kids.collection.repository.CategoryRepository;
 import com.kids.collection.request.CategoryRequest;
 import com.kids.collection.response.CategoryResponse;
+import com.kids.collection.response.CategoryResponseWithParent;
+import com.kids.collection.utils.Pagination;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,29 +21,29 @@ import java.util.stream.Collectors;
 public class CategoryService {
     private final CategoryRepository repository;
 
-    public Set<CategoryResponse> findCategories(String categoryName, int pageNumber, int pageSize) {
-        Page<Category> categories =  repository.findByNameLikeIgnoreCase(categoryName,PageRequest.of(pageNumber, pageSize));
+    public Set<CategoryResponseWithParent> findCategories(String categoryName) {
+        Page<Category> categories =  categoryName == null
+                ? repository.findAll(Pagination.fixed("name"))
+                : repository.findByNameLikeIgnoreCase(categoryName, Pagination.fixed("name"));
 
-        Set<CategoryResponse> responses = categories
+        return categories
                 .stream()
                 .map(CategoryService::toCategoryResponse)
                 .collect(Collectors.toSet());
-
-        return responses;
     }
 
     @Transactional
-    public CategoryResponse createCategory(CategoryRequest request) throws CategoryNotFoundException{
-        Category category = repository.save(toCategory(request));
+    public CategoryResponseWithParent createCategory(CategoryRequest request) throws CategoryNotFoundException{
+        com.kids.collection.entity.Category category = repository.save(toCategory(request));
         return toCategoryResponse(category);
     }
 
-    private Category toCategory(CategoryRequest request){
-        Category category = new Category();
+    private com.kids.collection.entity.Category toCategory(CategoryRequest request){
+        com.kids.collection.entity.Category category = new com.kids.collection.entity.Category();
 
         Long parentId = request.getParent();
         if(parentId != null){
-            Optional<Category> parentCategory = repository.findById(parentId);
+            Optional<com.kids.collection.entity.Category> parentCategory = repository.findById(parentId);
             if(parentCategory.isEmpty()){
                 throw new CategoryNotFoundException(parentId);
             }
@@ -55,12 +56,27 @@ public class CategoryService {
         return category;
     }
 
-    private static CategoryResponse toCategoryResponse(Category category){
-        return new CategoryResponse(
+    private static CategoryResponseWithParent toCategoryResponse(Category category){
+        Category parent = category.getParent();
+
+        CategoryResponseWithParent response = new CategoryResponseWithParent(
                 category.getId(),
                 category.getName(),
                 category.getDescription(),
-                category.getParent()
+                null
+
         );
+
+        if (parent != null){
+            response.setParent(
+                    new CategoryResponse(
+                            parent.getId(),
+                            parent.getName(),
+                            parent.getDescription()
+                    )
+            );
+        }
+
+        return response;
     }
 }

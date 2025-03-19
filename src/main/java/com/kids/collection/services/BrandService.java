@@ -4,6 +4,7 @@ import com.kids.collection.entity.Brand;
 import com.kids.collection.repository.BrandRepository;
 import com.kids.collection.request.BrandRequest;
 import com.kids.collection.response.BrandResponse;
+import com.kids.collection.utils.Pagination;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class BrandService {
@@ -20,9 +24,15 @@ public class BrandService {
 
     private final BrandRepository repository;
 
-    public Page<BrandResponse> findBrands(int pageNumber, int pageSize) {
-        Page<Brand> brands =  repository.findAll(PageRequest.of(pageNumber,pageSize, Sort.by(Sort.Direction.fromString("desc"),"Name")));
-        return brands.map(BrandService::toBrandResponse);
+    public Set<BrandResponse> findBrands(String name) {
+        Page<Brand> brands = name == null
+                ? repository.findAll(Pagination.fixed("name"))
+                : repository.findByNameLikeIgnoreCase(name, Pagination.fixed("name"));
+
+        return brands
+                .stream()
+                .map(BrandService::toBrandResponse)
+                .collect(Collectors.toSet());
     }
 
     @Transactional

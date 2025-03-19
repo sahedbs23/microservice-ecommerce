@@ -1,7 +1,7 @@
 package com.kids.collection.controller;
 
 import com.kids.collection.request.CategoryRequest;
-import com.kids.collection.response.CategoryResponse;
+import com.kids.collection.response.CategoryResponseWithParent;
 import com.kids.collection.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,17 +18,13 @@ public class CategoryController {
     private final CategoryService service;
 
     @GetMapping
-    public Set<CategoryResponse> findCategories(
-            @RequestParam(name = "pageNumber", required = false, defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize,
-            @RequestParam(name = "name") String name
-    ){
-        return service.findCategories(name, pageNumber, pageSize);
+    public Set<CategoryResponseWithParent> findCategories(@RequestParam(name = "name", required = false, defaultValue = "") String name){
+        return service.findCategories(name.isBlank() ? null : name);
     }
 
     @PostMapping
-    private ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request){
-        CategoryResponse response = service.createCategory(request);
+    private ResponseEntity<CategoryResponseWithParent> createCategory(@Valid @RequestBody CategoryRequest request){
+        CategoryResponseWithParent response = service.createCategory(request);
         URI uri = URI.create("/categories/"+response.getId());
         return ResponseEntity.created(uri).build();
     }

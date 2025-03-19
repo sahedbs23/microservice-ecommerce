@@ -22,11 +22,8 @@ public class BrandController {
     private final BrandService service;
 
     @GetMapping
-    public ResponseEntity<Page<BrandResponse>> findBrands(
-            @RequestParam(name = "pageNumber", required = false, defaultValue = "0") int pageNumber,
-            @RequestParam(name = "pageSize", required = false, defaultValue = "20") int pageSize
-    ){
-        Page<BrandResponse> responses = service.findBrands(pageNumber, pageSize);
+    public ResponseEntity<Set<BrandResponse>> findBrands(@RequestParam(name = "name", required = false, defaultValue = "") String name){
+        Set<BrandResponse> responses = service.findBrands(name.isBlank() ? null : name);
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
