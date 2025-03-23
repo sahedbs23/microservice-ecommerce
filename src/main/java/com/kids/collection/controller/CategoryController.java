@@ -5,6 +5,7 @@ import com.kids.collection.response.CategoryResponseWithParent;
 import com.kids.collection.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class CategoryController {
         return service.findCategories(name.isBlank() ? null : name);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<CategoryResponseWithParent> createCategory(@Valid @RequestBody CategoryRequest request){
         CategoryResponseWithParent response = service.createCategory(request);
         URI uri = URI.create("/categories/"+response.getId());

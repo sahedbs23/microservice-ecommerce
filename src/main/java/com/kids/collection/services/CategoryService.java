@@ -22,33 +22,33 @@ public class CategoryService {
     private final CategoryRepository repository;
 
     public Set<CategoryResponseWithParent> findCategories(String categoryName) {
-        Page<Category> categories =  categoryName == null
+        Page<Category> categories = categoryName == null
                 ? repository.findAll(Pagination.fixed("name"))
                 : repository.findByNameLikeIgnoreCase(categoryName, Pagination.fixed("name"));
 
         return categories
                 .stream()
-                .map(CategoryService::toCategoryResponse)
+                .map(CategoryService::toCategoryWithParentResponse)
                 .collect(Collectors.toSet());
     }
 
     @Transactional
-    public CategoryResponseWithParent createCategory(CategoryRequest request) throws CategoryNotFoundException{
+    public CategoryResponseWithParent createCategory(CategoryRequest request) throws CategoryNotFoundException {
         com.kids.collection.entity.Category category = repository.save(toCategory(request));
-        return toCategoryResponse(category);
+        return toCategoryWithParentResponse(category);
     }
 
-    private com.kids.collection.entity.Category toCategory(CategoryRequest request){
+    private Category toCategory(CategoryRequest request) {
         com.kids.collection.entity.Category category = new com.kids.collection.entity.Category();
 
         Long parentId = request.getParent();
-        if(parentId != null){
+        if (parentId != null) {
             Optional<com.kids.collection.entity.Category> parentCategory = repository.findById(parentId);
-            if(parentCategory.isEmpty()){
+            if (parentCategory.isEmpty()) {
                 throw new CategoryNotFoundException(parentId);
             }
             category.setParent(parentCategory.get());
-        }else {
+        } else {
             category.setParent(null);
         }
         category.setName(request.getName());
@@ -56,7 +56,7 @@ public class CategoryService {
         return category;
     }
 
-    private static CategoryResponseWithParent toCategoryResponse(Category category){
+    private static CategoryResponseWithParent toCategoryWithParentResponse(Category category) {
         Category parent = category.getParent();
 
         CategoryResponseWithParent response = new CategoryResponseWithParent(
@@ -67,7 +67,7 @@ public class CategoryService {
 
         );
 
-        if (parent != null){
+        if (parent != null) {
             response.setParent(
                     new CategoryResponse(
                             parent.getId(),
@@ -78,5 +78,14 @@ public class CategoryService {
         }
 
         return response;
+    }
+
+    public static CategoryResponse toCategoryResponse(Category category) {
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getDescription()
+        );
+
     }
 }

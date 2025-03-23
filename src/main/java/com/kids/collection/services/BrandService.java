@@ -1,6 +1,7 @@
 package com.kids.collection.services;
 
 import com.kids.collection.entity.Brand;
+import com.kids.collection.exception.RecordNotFoundException;
 import com.kids.collection.repository.BrandRepository;
 import com.kids.collection.request.BrandRequest;
 import com.kids.collection.response.BrandResponse;
@@ -41,6 +42,11 @@ public class BrandService {
         return toBrandResponse(brand);
     }
 
+    public BrandResponse findBrandById(Long brandId){
+        Brand brand = repository.findById(brandId).orElseThrow(() -> new RecordNotFoundException(brandId));
+        return toBrandResponse(brand);
+    }
+
     private static Brand toBrand(BrandRequest request){
         Brand brand = new Brand();
         brand.setName(request.getName());
@@ -50,7 +56,7 @@ public class BrandService {
         return brand;
     }
 
-    private static BrandResponse toBrandResponse(Brand brand){
+    public static BrandResponse toBrandResponse(Brand brand){
         return new BrandResponse(
                 brand.getId(),
                 brand.getName(),

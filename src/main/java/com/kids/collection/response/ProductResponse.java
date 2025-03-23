@@ -1,6 +1,7 @@
 package com.kids.collection.response;
 
 import com.kids.collection.entity.Brand;
+import com.kids.collection.entity.Category;
 import com.kids.collection.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class ProductResponse {
     private Long id;
     private String productName;
     private String description;
-    private Brand productBrand;
-    private Set<Tag> tags;
+    private CategoryResponse category;
+    private BrandResponse brand;
+    private Set<TagResponse> tags;
 }

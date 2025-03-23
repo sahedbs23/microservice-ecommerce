@@ -33,7 +33,7 @@ public class TagService {
         return  toTagResponse(savedTag);
     }
 
-    private static TagResponse toTagResponse(Tag tag) {
+    public static TagResponse toTagResponse(Tag tag) {
         return new TagResponse(tag.getId(), tag.getName());
     }
 
